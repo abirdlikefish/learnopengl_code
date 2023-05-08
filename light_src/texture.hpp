@@ -35,12 +35,6 @@ void TEXTURE::use(SHADER *shader)
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, ID[1]);
 
-    // if(textureNumber < 3)
-    //     return;
-
-    // glActiveTexture(GL_TEXTURE2);
-    // glBindTexture(GL_TEXTURE_2D, ID[2]);
-
 }
 
 TEXTURE::TEXTURE(const char* diffuseTexturePath )

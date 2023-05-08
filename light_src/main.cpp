@@ -11,6 +11,8 @@
 #include "vao.hpp"
 #include "camera.hpp"
 #include "pointLight.hpp"
+#include "directionalLight.hpp"
+#include "spotLight.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window , int  windowWidth , int  windowHeight );
 
@@ -77,61 +79,6 @@ int main()
     ::camera = &camera;
 
 // ===============================================================
-/*
-    float vertices[] = {
-            -1, 1, 0,
-            -1, 1, 0,
-            -0.5, 1, 0,
-            -0.5, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0.5, 1, 0,
-            0.5, 1, 0,
-            1, 1, 0,
-            1, 1, 0,
-            -1, 0.5, 0,
-            -1, 0.5, 0,
-            -0.5, 0.5, 0,
-            -0.5, 0.5, 0,
-            0, 0.5, 0,
-            0, 0.5, 0,
-            0.5, 0.5, 0,
-            0.5, 0.5, 0,
-            1, 0.5, 0,
-            1, 0.5, 0,
-            -1, 0, 0,
-            -1, 0, 0,
-            -0.5, 0, 0,
-            -0.5, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0.5, 0, 0,
-            0.5, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            -1, -0.5, 0,
-            -1, -0.5, 0,
-            -0.5, -0.5, 0,
-            -0.5, -0.5, 0,
-            0, -0.5, 0,
-            0, -0.5, 0,
-            0.5, -0.5, 0,
-            0.5, -0.5, 0,
-            1, -0.5, 0,
-            1, -0.5, 0,
-            -1, -1, 0,
-            -1, -1, 0,
-            -0.5, -1, 0,
-            -0.5, -1, 0,
-            0, -1, 0,
-            0, -1, 0,
-            0.5, -1, 0,
-            0.5, -1, 0,
-            1, -1, 0,
-            1, -1, 0
-        };
-
-*/
     unsigned int  verticesNum = 8 * 4 * 6 ;
     float vertices[] = {
         //前
@@ -201,12 +148,6 @@ int main()
 
 
     };
-    // float vertices[] = {
-    //     -0.5,0.5,0,     0,0,0,      -0.5,0.5,
-    //     0.5,0.5,0,      0,0,0,      0.5,0.5,
-    //     -0.5,-0.5,0,    0,0,0,      -0.5,-0.5,
-    //     0.5,-0.5,0,     0,0,0,      0.5,-0.5
-    // };
     unsigned int  indicesNum = 3 * 2 * 6;
     unsigned int indices[] = {
         0,2,3,
@@ -236,43 +177,6 @@ int main()
     VAO vao(verticesNum , vertices , indicesNum , indices);
     VAO vao_pointLight(verticesNum , vertices_light , indicesNum , indices);
 
-/*
-//设置VAO
-    unsigned int VAO ;
-    glGenVertexArrays(1 , &VAO);
-    glBindVertexArray(VAO);
-
-//设置VBO
-    unsigned int VBO ;
-    glGenBuffers(1 , &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER , sizeof(vertices) , vertices , GL_STATIC_DRAW);
-
-//设置EBO
-    unsigned int EBO ;
-    glGenBuffers(1 , &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER , EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER , sizeof(indices) , indices , GL_STATIC_DRAW);
-
-//设置顶点属性
-    //vertex position
-    glVertexAttribPointer(0,3,GL_FLOAT , GL_FALSE, 8 * sizeof(float) , (void*)0 );
-    glEnableVertexAttribArray(0);
-
-    //vertex color
-    glVertexAttribPointer(1,3,GL_FLOAT , GL_FALSE, 8 * sizeof(float) , (void*)(3*sizeof(float)) );
-    glEnableVertexAttribArray(1);
-
-    //vertex texture
-    glVertexAttribPointer(2,2,GL_FLOAT , GL_FALSE, 8 * sizeof(float) , (void*)(6*sizeof(float)) );
-    glEnableVertexAttribArray(2);
-
-
-//解绑VAO
-    glBindVertexArray(0);
-
-*/
-
 
 // ================================================================= 
 // shader
@@ -282,13 +186,8 @@ int main()
 
 // =================================================================
 // texture
-    // const char *texturePath0 = "./model/toon2.png";
-    // const char *texturePath0 = "./model/box.png";
     const char *diffuseTexturePath = "./model/box_diffuse.jpg";
     const char *specularTexturePath = "./model/box_specular.jpg";
-    // const char *texturePath0 = "./model/wall.jpg";
-    // const char *texturePath1 = "./model/huaji.jpg";
-    // TEXTURE texture(texturePath0 , texturePath1);
     TEXTURE texture(diffuseTexturePath,specularTexturePath);
 
 // =================================================================
@@ -305,16 +204,25 @@ int main()
         glm::vec3(4 , -1 , -2),
         glm::vec3(0 , 2 , 2)
     };
-    POINT_LIGHT pointLight0(pointLightPosition[0]);
-    POINT_LIGHT pointLight1(pointLightPosition[1]);
-    POINT_LIGHT pointLight2(pointLightPosition[2]);
-    POINT_LIGHT pointLight3(pointLightPosition[3]);
+    POINT_LIGHT pointLight(4);
+    for(int i = 0; i < 4; i++)
+    {
+        pointLight.setPointLight(i , pointLightPosition[i]);
+    }
 
+    DIRECTIONAL_LIGHT directionalLight(1);
+    directionalLight.setDirectionalLight(0 , glm::vec3(1 , -1 , 0));
+
+    SPOT_LIGHT spotLight(1);
 
 //============================================================================
 //渲染循环
+
     glEnable(GL_DEPTH_TEST);
-    // float lastFrameTime = 0 ;
+
+    pointLight.use(&shader);
+    directionalLight.use(&shader);
+
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -326,37 +234,22 @@ int main()
         camera.use(&shader);
         shader.setProj(camera.fov , windowWidth / windowHeight , camera.zNear, camera.zFar);
         shader.setView(camera.getPosition() , camera.getDirection() );
-        //0
-        pointLight0.use(&shader , 0);
-        shader.setModel(0,glm::vec3(0,1,0),glm::vec3(0.05,0.05,0.05),pointLightPosition[0] );
-        shader.use();
-        glDrawElements(GL_TRIANGLES , indicesNum , GL_UNSIGNED_INT , 0);
-        //1
-        pointLight1.use(&shader , 1);
-        shader.setModel(0,glm::vec3(0,1,0),glm::vec3(0.05,0.05,0.05),pointLightPosition[1] );
-        shader.use();
-        glDrawElements(GL_TRIANGLES , indicesNum , GL_UNSIGNED_INT , 0);
-        //2
-        pointLight2.use(&shader , 2);
-        shader.setModel(0,glm::vec3(0,1,0),glm::vec3(0.05,0.05,0.05),pointLightPosition[2] );
-        shader.use();
-        glDrawElements(GL_TRIANGLES , indicesNum , GL_UNSIGNED_INT , 0);
-        //3
-        pointLight3.use(&shader , 3);
-        shader.setModel(0,glm::vec3(0,1,0),glm::vec3(0.05,0.05,0.05),pointLightPosition[3] );
-        shader.use();
-        glDrawElements(GL_TRIANGLES , indicesNum , GL_UNSIGNED_INT , 0);
+        for(int i = 0 ; i < 4 ; i ++)
+        {
+            shader.setModel(0,glm::vec3(0,1,0),glm::vec3(0.05,0.05,0.05),pointLightPosition[i] );
+            shader.use();
+            glDrawElements(GL_TRIANGLES , indicesNum , GL_UNSIGNED_INT , 0);
 
+        }
 
 
 // draw box
         vao.use();
-        pointLight0.use(&shader,0);
-        pointLight1.use(&shader,1);
-        pointLight2.use(&shader,2);
-        pointLight3.use(&shader,3);
         texture.use(&shader);
         camera.use(&shader);
+        
+        spotLight.setSpotLight(0 , camera.getPosition() , camera.getDirection() );
+        spotLight.use(&shader);
 
         shader.setModel(0,glm::vec3(0,1,0),glm::vec3(1,1,1),glm::vec3(0,0,0) );
         shader.use();
@@ -376,8 +269,6 @@ int main()
     }
 
     //============================================================================
-    // glDeleteVertexArrays(1,&VAO);
-    // glDeleteBuffers(1,&VBO);
 
     glfwTerminate();
     return 0;
@@ -406,9 +297,8 @@ void mouse_callback(GLFWwindow* window, double mousex, double mousey)
 
 void processInput(GLFWwindow *window)
 {
-    // float speed = 0.0001;
     float time = glfwGetTime();
-    float speed = time - lastFrame.time ;
+    float speed = (time - lastFrame.time) * 5;
     lastFrame.time = time;
 
     if(glfwGetKey(window , GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -418,7 +308,7 @@ void processInput(GLFWwindow *window)
     else
     {
         time = fmod(time , 1);
-        // glClearColor(time,time, 1-time, 1);
+        glClearColor(time,time, 1-time, 1);
         glClearColor(0,0, 0 , 1);
         glClear(GL_COLOR_BUFFER_BIT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
